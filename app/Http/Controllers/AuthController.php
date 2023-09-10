@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -18,6 +19,7 @@ class AuthController extends Controller
             'last_name' => 'required|string',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|confirmed',
+            'terms_and_conditions' => 'accepted'
         ]);
 
         $user = User::create([
@@ -34,6 +36,7 @@ class AuthController extends Controller
             'token' => $token
         ];
 
+        // return $this->success($data, 'Account successfully registered', 201);
         return response($response, 201);
     }
 
@@ -61,6 +64,8 @@ class AuthController extends Controller
             'token' => $token
         ];
 
+        Auth::login($user);
+
         return response($response, 201);
     }
 
@@ -69,6 +74,8 @@ class AuthController extends Controller
         $user = $request->user();
 
         $user->tokens()->delete();
+
+        Auth::logout($user);
 
         return [
             'message' => 'Logged out'
